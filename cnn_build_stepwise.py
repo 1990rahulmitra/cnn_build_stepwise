@@ -6,7 +6,9 @@
 
 import cv2
 import matplotlib.pyplot as plt
-# change the path if requires 
+
+# we will visualize the below mentioned image later on
+# change the path and provide the path from your file system 
 img = cv2.imread('C:\\Users\\rmitra\\Desktop\\photograph\\fruits\\fruits-360\\Training\\Mango\\13_100.jpg')
 
 
@@ -16,7 +18,7 @@ img = cv2.imread('C:\\Users\\rmitra\\Desktop\\photograph\\fruits\\fruits-360\\Tr
 import numpy as np
 from sklearn.datasets import load_files
 
-# change the path if requires 
+# change the path and provide the path from your file system  
 training_folder = 'C:\\Users\\rmitra\\Desktop\\photograph\\fruits\\fruits-360\\Training'
 test_folder = 'C:\\Users\\rmitra\\Desktop\\photograph\\fruits\\fruits-360\\Test'
 
@@ -63,6 +65,14 @@ y_test = np_utils.to_categorical(y_test,count_output_classes)
 
 
 # ### testset splitted into validation and test dataset 
+# Generally for creating validaion set we should use some standard technique 
+# like k-way cross validation on training set.
+# In competitions where you don't know the output label of testset, 
+# there anyway you don't have a way to create validation set from testset. 
+
+# For the sake of simplicity ,during demo I created validation set from testset, since 
+# for my case I know the output label for testset.
+# But genarally, you should try to create validation set from training set.
 
 # In[6]:
 
@@ -123,21 +133,33 @@ from keras.layers import Activation, Dense, Flatten, Dropout
 model = Sequential()
 
 #Addition of Convolution layer
-model.add(Conv2D(filters = 3, kernel_size = 2,activation= 'relu',input_shape=(100,100,3)))
+model.add(Conv2D(filters = 8, kernel_size = 2,activation= 'relu',input_shape=(100,100,3)))
 model.add(MaxPooling2D(pool_size=2))
 
 
 # In[14]:
 
-
+# function for printing the original image of a mango
 def print_image(model1,img1) : 
     img_batch = np.expand_dims(img1,axis=0)
     print(img_batch.shape)
     img_conv = model1.predict(img_batch)
     print(img_conv.shape)
-    img2 = np.squeeze(img_conv,axis=0)
-    print(img2.shape)
+    #img2 = np.squeeze(img_conv,axis=0)
+    #print(img2.shape)
     plt.imshow(img2)
+	
+
+# function for visualizing the image after pooling operation.
+# In the last line of this function the 7th activation map has been printed.
+# You can check other activation maps by just changing the value of last index.
+ 
+def print_pooled_image(model1,img1):
+    img_batch = np.expand_dims(img1,axis=0)
+    print(img_batch.shape)
+    img_conv = model1.predict(img_batch,verbose=1)
+    print(img_conv.shape)
+    plt.matshow(img_conv[0, :, :, 6], cmap='viridis')
 
 
 # ## Print image of a Mango
@@ -153,7 +175,7 @@ plt.imshow(img)
 # In[16]:
 
 
-print_image(model,img)
+print_pooled_image(model,img)
 
 
 # ## Adding other layers of CNN
@@ -227,8 +249,36 @@ score = model.evaluate(x_test, y_test, verbose=0)
 print('\n', 'Test accuracy:', score[1])
 
 
+## Plotting accuracy and loss
+
+import matplotlib.pyplot as plt 
+   
+ # plot for accuracy  
+   
+plt.subplot(211)  
+plt.plot(history.history['acc'])  
+plt.plot(history.history['val_acc'])  
+plt.title('Accuracy', fontsize='large')  
+plt.xlabel('Epoch')
+plt.ylabel('Accuracy')  
+plt.legend(['training', 'validation'], loc='upper left')
+plt.show()
+
+# plot for loss  
+   
+plt.subplot(212)  
+plt.plot(history.history['loss'])  
+plt.plot(history.history['val_loss'])  
+plt.title('Loss', fontsize='large')  
+plt.xlabel('Epoch')
+plt.ylabel('Loss')  
+plt.legend(['training', 'validation'], loc='upper left')  
+plt.show()
 
 # ## Predicting the the fruit classes
+
+# Here randomly 8 images have been printed. Among that 4 have been classified correctly
+# and 4 have been wrongly classified. 
 
 # In[22]:
 
